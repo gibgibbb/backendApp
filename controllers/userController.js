@@ -19,7 +19,7 @@ const login = (req, res) => {
 };
 
 const getProfile = (req, res) => {
-  const userId = 1; // Mock user ID
+  const userId = 1;
   const user = UserModel.findById(userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
