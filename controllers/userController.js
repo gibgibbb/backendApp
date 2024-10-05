@@ -16,7 +16,7 @@ const loginSchema = Joi.object({
   password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required()
 });
 
-const register = async (req, res) => {
+const register = (req, res) => {
     const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -26,15 +26,11 @@ const register = async (req, res) => {
     if (UserModel.findByUsername(username)) {
       return res.status(400).json({ message: 'Username already exists' });
     }
-  
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-  
-    const newUser = UserModel.create({ username, password: hashedPassword, email });
+    const newUser = UserModel.create({ username, password, email });
     res.status(201).json({ message: 'User registered successfully', userId: newUser.id });
-  };  
+  };
 
-const login = async (req, res) => {
+  const login = (req, res) => {
     const { error } = loginSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -42,12 +38,7 @@ const login = async (req, res) => {
   
     const { username, password } = req.body;
     const user = UserModel.findByUsername(username);
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-  
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
+    if (!user || user.password !== password) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
   
